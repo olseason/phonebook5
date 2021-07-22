@@ -12,24 +12,22 @@ import com.javaex.vo.PersonVo;
 
 public class PhoneDao {
 
-	// 0. import java.sql.*;
+	// 필드
 	private Connection conn = null;
 	private PreparedStatement pstmt = null;
 	private ResultSet rs = null;
 
-	private String driver = "oracle.jdbc.driver.OracleDriver";
-	private String url = "jdbc:oracle:thin:@localhost:1521:xe";
-	private String id = "phonedb";
-	private String pw = "phonedb";
+	private String driver = "oracle.jdbc.driver.OracleDriver"; // 드라이버
+	private String url = "jdbc:oracle:thin:@localhost:1521:xe"; // IP주소와 포트번호
+	private String id = "phonedb"; // SQL 계정 이름
+	private String pw = "phonedb"; // SQL 계정 비밀번호
 
+	// DB 연결
 	private void getConnection() {
 		try {
-			// 1. JDBC 드라이버 (Oracle) 로딩
 			Class.forName(driver);
 
-			// 2. Connection 얻어오기
 			conn = DriverManager.getConnection(url, id, pw);
-			// System.out.println("접속성공");
 
 		} catch (ClassNotFoundException e) {
 			System.out.println("error: 드라이버 로딩 실패 - " + e);
@@ -38,8 +36,8 @@ public class PhoneDao {
 		}
 	}
 
-	public void close() {
-		// 5. 자원정리
+	// 자원 정리
+	private void close() {
 		try {
 			if (rs != null) {
 				rs.close();
@@ -53,192 +51,218 @@ public class PhoneDao {
 		} catch (SQLException e) {
 			System.out.println("error:" + e);
 		}
+
 	}
 
-	// 사람 추가
-	public int personInsert(PersonVo personVo) {
-		int count = 0;
-		getConnection();
-
-		try {
-
-			// 3. SQL문 준비 / 바인딩 / 실행
-			String query = ""; // 쿼리문 문자열만들기, ? 주의
-			query += " INSERT INTO person ";
-			query += " VALUES (seq_person_id.nextval, ?, ?, ?) ";
-			// System.out.println(query);
-
-			pstmt = conn.prepareStatement(query); // 쿼리로 만들기
-
-			pstmt.setString(1, personVo.getName()); // ?(물음표) 중 1번째, 순서중요
-			pstmt.setString(2, personVo.getHp()); // ?(물음표) 중 2번째, 순서중요
-			pstmt.setString(3, personVo.getCompany()); // ?(물음표) 중 3번째, 순서중요
-
-			count = pstmt.executeUpdate(); // 쿼리문 실행
-
-			// 4.결과처리
-			// System.out.println("[" + count + "건 추가되었습니다.]");
-
-		} catch (SQLException e) {
-			System.out.println("error:" + e);
-		}
-		close();
-		return count;
-	}
-
-	// 사람 리스트(검색안할때)
+	// 전화번호부 출력
 	public List<PersonVo> getPersonList() {
 		return getPersonList("");
+
 	}
 
-	// 사람 리스트(검색할때)
-	public List<PersonVo> getPersonList(String keword) {
+	// 전화번호부 출력 & 검색
+	public List<PersonVo> getPersonList(String keyword) {
 		List<PersonVo> personList = new ArrayList<PersonVo>();
 
-		getConnection();
+		// 2번, 4번 메소드
+		this.getConnection();
 
 		try {
-
-			// 3. SQL문 준비 / 바인딩 / 실행 --> 완성된 sql문을 가져와서 작성할것
+			// 3. SQL문 준비 / 바인딩 / 실행
 			String query = "";
-			query += " select  person_id, ";
-			query += "         name, ";
-			query += "         hp, ";
-			query += "         company ";
-			query += " from person";
+			query += " SELECT ";
+			query += "     person_id, ";
+			query += "     name, ";
+			query += "     hp, ";
+			query += "     company ";
+			query += " FROM ";
+			query += "     person ";
 
-			if (keword != "" || keword == null) {
-				query += " where name like ? ";
-				query += " or hp like  ? ";
-				query += " or company like ? ";
-				pstmt = conn.prepareStatement(query); // 쿼리로 만들기
+			if (keyword == null || keyword.equals("")) {
 
-				pstmt.setString(1, '%' + keword + '%'); // ?(물음표) 중 1번째, 순서중요
-				pstmt.setString(2, '%' + keword + '%'); // ?(물음표) 중 2번째, 순서중요
-				pstmt.setString(3, '%' + keword + '%'); // ?(물음표) 중 3번째, 순서중요
+				query += " ORDER BY ";
+				query += "     person_id ASC ";
+
 			} else {
-				pstmt = conn.prepareStatement(query); // 쿼리로 만들기
+				query += " WHERE ";
+				query += "     person_id LIKE '%" + keyword + "%' ";
+				query += "     OR name LIKE '%" + keyword + "%' ";
+				query += "     OR hp LIKE '%" + keyword + "%' ";
+				query += "     OR company LIKE '%" + keyword + "%' ";
 			}
 
+			pstmt = conn.prepareStatement(query);
 			rs = pstmt.executeQuery();
 
-			// 4.결과처리
 			while (rs.next()) {
-				int personId = rs.getInt("person_id");
+				int person_id = rs.getInt("person_id");
 				String name = rs.getString("name");
 				String hp = rs.getString("hp");
 				String company = rs.getString("company");
 
-				PersonVo personVo = new PersonVo(personId, name, hp, company);
+				PersonVo personVo = new PersonVo(person_id, name, hp, company);
+
 				personList.add(personVo);
 			}
 
+			// 4.결과처리
+
 		} catch (SQLException e) {
-			System.out.println("error:" + e);
+			e.printStackTrace();
 		}
 
-		close();
+		// 5번 메소드
+		this.close();
 
 		return personList;
-
 	}
 
-	// 사람 수정
-	public int personUpdate(PersonVo personVo) {
-		int count = 0;
-		getConnection();
+	// 전화번호 등록
+	public int insert(PersonVo personVo) {
+
+		int count = -1;
+
+		// 2번, 4번 메소드
+		this.getConnection();
 
 		try {
-
 			// 3. SQL문 준비 / 바인딩 / 실행
-			String query = ""; // 쿼리문 문자열만들기, ? 주의
-			query += " update person ";
-			query += " set name = ? , ";
-			query += "     hp = ? , ";
-			query += "     company = ? ";
-			query += " where person_id = ? ";
+			String insert = "";
+			insert += " INSERT INTO person VALUES ( ";
+			insert += "     seq_person_id.NEXTVAL, ";
+			insert += "     ?, ";
+			insert += "     ?, ";
+			insert += "     ? ";
+			insert += " ) ";
 
-			pstmt = conn.prepareStatement(query); // 쿼리로 만들기
+			pstmt = conn.prepareStatement(insert);
+			pstmt.setString(1, personVo.getName());
+			pstmt.setString(2, personVo.getHp());
+			pstmt.setString(3, personVo.getCompany());
 
-			pstmt.setString(1, personVo.getName()); // ?(물음표) 중 1번째, 순서중요
-			pstmt.setString(2, personVo.getHp()); // ?(물음표) 중 2번째, 순서중요
-			pstmt.setString(3, personVo.getCompany()); // ?(물음표) 중 3번째, 순서중요
-			pstmt.setInt(4, personVo.getPersonId()); // ?(물음표) 중 4번째, 순서중요
-
-			count = pstmt.executeUpdate(); // 쿼리문 실행
+			count = pstmt.executeUpdate();
 
 			// 4.결과처리
-			// System.out.println(count + "건 수정되었습니다.");
+			System.out.println("[" + personVo.getName() + "님이 등록되었습니다.]");
+			System.out.println();
 
 		} catch (SQLException e) {
-			System.out.println("error:" + e);
+			e.printStackTrace();
 		}
 
-		close();
+		// 5번 메소드
+		this.close();
 		return count;
 	}
 
-	// 사람 삭제
-	public int personDelete(int personId) {
-		int count = 0;
-		getConnection();
+	// 전화번호 수정
+	public int update(PersonVo personVo) {
+
+		int count = -1;
+
+		// 2번, 4번 메소드
+		this.getConnection();
 
 		try {
 			// 3. SQL문 준비 / 바인딩 / 실행
-			String query = ""; // 쿼리문 문자열만들기, ? 주의
-			query += " delete from person ";
-			query += " where person_id = ? ";
-			pstmt = conn.prepareStatement(query); // 쿼리로 만들기
+			String update = "";
+			update += " UPDATE person ";
+			update += " SET ";
+			update += "     name = ?, ";
+			update += "     hp = ?, ";
+			update += "     company = ? ";
+			update += " WHERE ";
+			update += "     person_id = ? ";
 
-			pstmt.setInt(1, personId);// ?(물음표) 중 1번째, 순서중요
+			pstmt = conn.prepareStatement(update);
+			pstmt.setString(1, personVo.getName());
+			pstmt.setString(2, personVo.getHp());
+			pstmt.setString(3, personVo.getCompany());
+			pstmt.setInt(4, personVo.getPerson_id());
 
-			count = pstmt.executeUpdate(); // 쿼리문 실행
+			count = pstmt.executeUpdate();
 
 			// 4.결과처리
-			// System.out.println(count + "건 삭제되었습니다.");
+			System.out.println("[" + count + "건 수정되었습니다.]");
+			System.out.println();
 
 		} catch (SQLException e) {
-			System.out.println("error:" + e);
+			e.printStackTrace();
 		}
 
-		close();
+		// 5번 메소드
+		this.close();
+		return count;
+	}
+
+	// 전화번호 삭제
+	public int delete(int personId) {
+
+		int count = -1;
+
+		// 2번, 4번 메소드
+		this.getConnection();
+
+		try {
+			// 3. SQL문 준비 / 바인딩 / 실행
+			String delete = "";
+			delete += " DELETE FROM person ";
+			delete += " WHERE ";
+			delete += "     person_id = ? ";
+
+			pstmt = conn.prepareStatement(delete);
+			pstmt.setInt(1, personId);
+
+			count = pstmt.executeUpdate();
+
+			// 4.결과처리
+			System.out.println("[" + count + "건 삭제되었습니다.]");
+			System.out.println();
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		// 5번 메소드
+		this.close();
 		return count;
 	}
 
 	// 사람 1명 가져오기
 	public PersonVo getPerson(int personId) {
 		PersonVo personVo = null;
-		
+
 		getConnection();
 
 		try {
 			// 3. SQL문 준비 / 바인딩 / 실행
 			String query = "";
-			query += " select  person_id, ";
-			query += "         name, ";
-			query += "         hp, ";
-			query += "         company ";
-			query += " from person";
-			query += " where person_id = ?";
+			query += " SELECT ";
+			query += "     person_id, ";
+			query += "     name, ";
+			query += "     hp, ";
+			query += "     company ";
+			query += " FROM ";
+			query += "     person ";
+			query += " WHERE ";
+			query += "     person_id = ? ";
 
 			pstmt = conn.prepareStatement(query);
 			pstmt.setInt(1, personId);
-			
+
 			rs = pstmt.executeQuery();
-		
+
 			// 4.결과처리
-			while(rs.next()) {
+			while (rs.next()) {
 				int pid = rs.getInt("person_id");
 				String name = rs.getString("name");
 				String hp = rs.getString("hp");
 				String company = rs.getString("company");
-				
+
 				personVo = new PersonVo(pid, name, hp, company);
 			}
-			
-			
+
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -247,6 +271,7 @@ public class PhoneDao {
 		close();
 
 		return personVo;
+
 	}
 
 }

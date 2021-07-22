@@ -30,7 +30,7 @@ public class PhoneController {
 		//Dao 사용
 		PhoneDao phoneDao = new PhoneDao();
 		
-		//데이터 가져오기
+		//데이터 가져오기(personList)
 		List<PersonVo> personList = phoneDao.getPersonList();
 		System.out.println(personList);
 		
@@ -78,7 +78,7 @@ public class PhoneController {
 		System.out.println(personVo);
 		
 		PhoneDao phoneDao = new PhoneDao();
-		phoneDao.personInsert(personVo);
+		phoneDao.insert(personVo);
 		
 		return "redirect:/phonebook3/list";
 	}
@@ -103,6 +103,62 @@ public class PhoneController {
 	*/
 	
 	
+	//삭제
+	@RequestMapping(value = "/delete/{person_id}", method = { RequestMethod.GET, RequestMethod.POST })
+	public String delete(@PathVariable("person_id") int person_id) {
+		System.out.println("[PhoneController.delete]");
+
+		// delete() 메소드 사용
+		PhoneDao phoneDao = new PhoneDao();
+		phoneDao.delete(person_id);
+
+		// 리다이렉트
+		return "redirect:/list";
+	}
+	
+	
+	//수정폼
+	/*** 수정 폼 ***/
+	@RequestMapping(value = "/modifyForm/{person_id}", method = { RequestMethod.GET, RequestMethod.POST })
+	public String modifyForm(@PathVariable("person_id") int person_id, Model model) {
+
+		// 한사람 정보 가져오기
+		PhoneDao phoneDao = new PhoneDao();
+		PersonVo onePerson = phoneDao.getPerson(person_id);
+
+		// model에 담기
+		model.addAttribute("onePerson", onePerson);
+
+		// modifyForm.jsp 포워드
+		return "/WEB-INF/views/modifyForm.jsp";
+	}
+	
+	//수정
+	@RequestMapping(value = "/modify", method = { RequestMethod.GET, RequestMethod.POST })
+	public String modify(@ModelAttribute PersonVo personVo) {
+
+		// update() 메소드 사용
+		PhoneDao phoneDao = new PhoneDao();
+		phoneDao.update(personVo);
+
+		// 리다이렉트
+		return "redirect:/list";
+	}
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	//PathVariable
 	@RequestMapping(value="/board/read/{no}", method= {RequestMethod.GET, RequestMethod.POST} )
 	public String read(@PathVariable("no") int boardNo) {
 		System.out.println("PathVariable [read]");
@@ -118,6 +174,7 @@ public class PhoneController {
 	
 	
 	
+	//test
 	@RequestMapping(value="/test")
 	public String test() {
 		System.out.println("test");

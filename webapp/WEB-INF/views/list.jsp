@@ -8,34 +8,34 @@
 <title>Insert title here</title>
 </head>
 <body>
-
 	<h1>전화번호 리스트</h1>
+
 	<p>입력한 정보 내역입니다.</p>
 
-	<c:forEach items="${ requestScope.pList }" var="vo" varStatus="status">
+	<c:forEach items="${requestScope.personList}" var="personVo">
 		<table border="1">
 			<tr>
 				<td>이름</td>
-				<td>${ vo.name }</td>
+				<td>${personVo.name}</td>
 			</tr>
 			<tr>
 				<td>핸드폰</td>
-				<td>${ vo.hp }</td>
+				<td>${personVo.hp}</td>
 			</tr>
 			<tr>
 				<td>회사</td>
-				<td>${ vo.company }</td>
+				<td>${personVo.company}</td>
 			</tr>
 			<tr>
-				<td><a href="/phonebook3/modifyForm?id=${ vo.personID }">[수정폼]</a></td>
-				<td><a href="/phonebook3/delete?id=${ vo.personID }">[삭제]</a></td>
+				<td><a href="/phonebook3/pb/updateForm?personId=${personVo.personId}">[수정]</a></td>
+				<td><a href="/phonebook3/pb/delete?personId=${personVo.personId}">[삭제]</a></td>
 			</tr>
+	
 		</table>
-
 		<br>
 	</c:forEach>
-
-	<a href="/phonebook3/writeForm">[추가번호 등록]</a>
-
+	
+	<a href="/phonebook3/pb/writeForm">등록</a>
+	
 </body>
 </html>
