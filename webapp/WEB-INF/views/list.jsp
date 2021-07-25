@@ -8,7 +8,7 @@
 <title>Insert title here</title>
 </head>
 <body>
-	<h1>전화번호 리스트</h1>
+	<h1>전화번호 리스트${pageContext.request.contextPath}</h1>
 
 	<p>입력한 정보 내역입니다.</p>
 
@@ -27,15 +27,15 @@
 				<td>${personVo.company}</td>
 			</tr>
 			<tr>
-				<td><a href="/phonebook3/pb/updateForm?personId=${personVo.personId}">[수정]</a></td>
-				<td><a href="/phonebook3/pb/delete?personId=${personVo.personId}">[삭제]</a></td>
+				<td><a href="${pageContext.request.contextPath}/modifyForm/${personVo.personId}">[수정]</a></td>
+				<td><a href="${pageContext.request.contextPath}/delete/${personVo.personId}">[삭제]</a></td>
 			</tr>
 	
 		</table>
 		<br>
 	</c:forEach>
 	
-	<a href="/phonebook3/pb/writeForm">등록</a>
+	<a href="${pageContext.request.contextPath}/writeForm">등록</a>
 	
 </body>
 </html>

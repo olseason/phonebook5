@@ -2,12 +2,14 @@ package com.javaex.controller;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.javaex.dao.PhoneDao;
 import com.javaex.vo.PersonVo;
@@ -17,6 +19,8 @@ import com.javaex.vo.PersonVo;
 public class PhoneController {
 
 	//필드
+	@Autowired
+	private PhoneDao phoneDao;
 	//생성자
 	//메소드gs
 	//메소드일반
@@ -28,14 +32,14 @@ public class PhoneController {
 		System.out.println("[PhoneController.list]");
 		
 		//Dao 사용
-		PhoneDao phoneDao = new PhoneDao();
+		//PhoneDao phoneDao = new PhoneDao();
 		
 		//데이터 가져오기(personList)
 		List<PersonVo> personList = phoneDao.getPersonList();
-		System.out.println(personList);
+		//System.out.println(personList);
 		
 		//model 담기 --> DispatcherServlet 전달됨 --> request의 "/WEB-INF/views/list.jsp" 넣는다
-		model.addAttribute("personList", personList);
+		//model.addAttribute("personList", personList);
 		
 		//view
 		return "/WEB-INF/views/list.jsp";
@@ -78,9 +82,9 @@ public class PhoneController {
 		System.out.println(personVo);
 		
 		PhoneDao phoneDao = new PhoneDao();
-		phoneDao.insert(personVo);
+		//phoneDao.insert(personVo);
 		
-		return "redirect:/phonebook3/list";
+		return "redirect:/phonebook5/list";
 	}
 	
 	
@@ -110,7 +114,7 @@ public class PhoneController {
 
 		// delete() 메소드 사용
 		PhoneDao phoneDao = new PhoneDao();
-		phoneDao.delete(person_id);
+		//phoneDao.delete(person_id);
 
 		// 리다이렉트
 		return "redirect:/list";
@@ -124,10 +128,10 @@ public class PhoneController {
 
 		// 한사람 정보 가져오기
 		PhoneDao phoneDao = new PhoneDao();
-		PersonVo onePerson = phoneDao.getPerson(person_id);
+		//PersonVo onePerson = phoneDao.getPerson(person_id);
 
 		// model에 담기
-		model.addAttribute("onePerson", onePerson);
+		//model.addAttribute("onePerson", onePerson);
 
 		// modifyForm.jsp 포워드
 		return "/WEB-INF/views/modifyForm.jsp";
@@ -139,7 +143,7 @@ public class PhoneController {
 
 		// update() 메소드 사용
 		PhoneDao phoneDao = new PhoneDao();
-		phoneDao.update(personVo);
+		//phoneDao.update(personVo);
 
 		// 리다이렉트
 		return "redirect:/list";
@@ -163,9 +167,9 @@ public class PhoneController {
 	public String read(@PathVariable("no") int boardNo) {
 		System.out.println("PathVariable [read]");
 		
-		//localhost:8088/phonebook3/board/read/1
-		//localhost:8088/phonebook3/board/read/2
-		//localhost:8088/phonebook3/board/read/100
+		//localhost:8088/phonebook5/board/read/1
+		//localhost:8088/phonebook5/board/read/2
+		//localhost:8088/phonebook5/board/read/100
 		
 		System.out.println(boardNo);
 		
